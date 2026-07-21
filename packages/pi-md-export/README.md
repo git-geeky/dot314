@@ -2,9 +2,30 @@
 
 Export your current Pi session to a readable Markdown transcript. The command can export either the current `/tree` branch or the full session file, and it can limit the output to the last N turns.
 
-Outputs can be copied to clipboard or saved under `~/.pi/agent/pi-sessions-extracted/`.
+Outputs can be copied to the native clipboard on Windows, macOS, and supported Linux desktops, or saved under `~/.pi/agent/pi-sessions-extracted/`.
 
 ## Install
+
+> [!IMPORTANT]
+> The Windows clipboard change documented here is currently available only on
+> `git-geeky/dot314`'s `codex/windows-clipboard` branch. The npm package and
+> `w-winter/dot314` commands below install the current upstream implementation,
+> which does not yet include this patch.
+
+To evaluate the fork without pinning a Pi package, clone its working branch,
+install only this package's runtime dependencies, generate its package files,
+and register the package directory as a local path:
+
+```powershell
+git clone --branch codex/windows-clipboard https://github.com/git-geeky/dot314.git
+npm --prefix .\dot314\packages\pi-md-export install --omit=dev --omit=peer
+npm --prefix .\dot314\packages\pi-md-export run prepack
+pi install "$PWD\dot314\packages\pi-md-export"
+```
+
+The local-path installation follows that checkout, so normal `git pull` updates
+it. An unpinned remote install requires this change to be merged upstream or
+published in a new npm release.
 
 From npm:
 
