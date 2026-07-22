@@ -8,7 +8,7 @@ Outputs can be copied to the native clipboard on Windows, macOS, and supported L
 
 > [!IMPORTANT]
 > The Windows clipboard change documented here is currently available only on
-> `git-geeky/dot314`'s `codex/windows-clipboard` branch. The npm package and
+> `git-geeky/dot314`'s `pi-md-export/windows-clipboard` branch. The npm package and
 > `w-winter/dot314` commands below install the current upstream implementation,
 > which does not yet include this patch.
 
@@ -17,7 +17,7 @@ install only this package's runtime dependencies, generate its package files,
 and register the package directory as a local path:
 
 ```powershell
-git clone --branch codex/windows-clipboard https://github.com/git-geeky/dot314.git
+git clone --branch pi-md-export/windows-clipboard https://github.com/git-geeky/dot314.git
 npm --prefix .\dot314\packages\pi-md-export install --omit=dev --omit=peer
 npm --prefix .\dot314\packages\pi-md-export run prepack
 pi install "$PWD\dot314\packages\pi-md-export"
