@@ -14,13 +14,16 @@
 - ● [`grounded-compaction/`](grounded-compaction/) ([README](./grounded-compaction/README.md))
   - Replaces Pi's compaction summarizer with configurable model presets, user-editable prompt contracts, and deterministic files-touched tracking that covers Pi native tools, RepoPrompt, and bash-derived file operations; also augments branch summarization during `/tree` with the same files-touched grounding and optional prompt customization
   - Uses the shared collector from [`_shared/files-touched-core.ts`](_shared/files-touched-core.ts); see [Pi compaction docs](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/compaction.md) for background
-  - ⚠ Hooks `session_before_compact` — incompatible with other extensions that do the same (e.g. `agentic-compaction`); having both active is a race condition
 
 - ● [`model-aware-compaction/`](model-aware-compaction/) ([README](./model-aware-compaction/README.md))
   - Triggers Pi's **built-in auto-compaction** at per-model percent-used thresholds (0-100), configured via `config.json` (keyed by model ID, supports `*` wildcards)
   - Nudges Pi's native compaction pipeline rather than calling `ctx.compact()`, preserving the compaction UI and automatic queued-message flush
   - Requires `compaction.enabled: true` in settings; see README for `reserveTokens` tuning
-  - Compatible with compaction-summary extensions (e.g. `agentic-compaction` via `session_before_compact`)
+
+- ● [`context-limit-fallback/`](context-limit-fallback/) ([README](./context-limit-fallback/README.md))
+  - Offers a per-session switch to a configured larger-context model at the first native reserve-token or valid model-aware percentage boundary
+  - `/context-limit-fallback` stores a branch-local session choice; choices survive resume, follow fork ancestry, and are restored by `/tree` navigation
+  - Loads immediately before `model-aware-compaction`, switches only on eligible completed runs, and leaves compaction behavior with Pi
 
 - ● [`session-ask/`](session-ask/) ([README](./session-ask/README.md))
   - `session_ask({ question, sessionPath? })` queries the current (or specified) session JSONL (including pre-compaction history) without bloating the current model context; `/session-ask ...` is a UI wrapper
@@ -174,7 +177,7 @@
   - Example starter file: [`../shell/pi-inline.zsh.example`](../shell/pi-inline.zsh.example)
 
 - ● [`skill-templates/`](skill-templates/) ([README](./skill-templates/README.md))
-  - Adds `SKILL.template.md` — Nunjucks-templated skill files rendered at invocation time from the user's positional arguments, named options, and flags; supports conditional sections, `{% include %}` partials, and a `{% skill %}` tag for composing content from other skills; output uses the same `<skill ...>` envelope as core `SKILL.md`
+  - Renders `SKILL.template.md` with Nunjucks for explicit skill invocations; `{% skill %}` recursively renders another skill body in the shared invocation context, while the final prompt keeps one root `<skill>` envelope and one root reference base
 
 - ● [`subagent-bridge/`](subagent-bridge/) ([README](./subagent-bridge/README.md))
   - Gives subagents spawned or resumed in the current orchestrator short, stable handles usable with `subagent_resume` and `intercom` in place of `.jsonl` paths or session UUIDs; requires `pi-interactive-subagents` and `pi-intercom`
@@ -210,11 +213,6 @@
 
 - ◐ [`rewind/`](rewind/) ([README](./rewind/README.md)) — **Archived.** Session-native rewrite developed in ([`b432676`](https://github.com/w-winter/dot314/commit/b43267682059a4b7c37d557b608e8413ecbd0298)) now adopted upstream into [nicobailon/pi-rewind-hook](https://github.com/nicobailon/pi-rewind-hook).  Install with `pi install npm:pi-rewind-hook`
 
-- ◐ [`agentic-compaction/`](agentic-compaction/) ([README](./agentic-compaction/README.md); upstream: [laulauland/dotfiles](https://github.com/laulauland/dotfiles/tree/main/shared/.pi/agent/extensions/file-based-compaction))
-  - Agentic compaction via a virtual filesystem: mounts `/conversation.json` and lets a summarizer model explore it with portable bash/zsh commands
-  - Emphasizes deterministic, tool-result-verified modified-file tracking (native + `rp`), filters likely temp artifacts, supports `/compact <note>`, and can parallelize tool calls via `toolCallConcurrency`
-  - ⚠ Hooks `session_before_compact` — incompatible with other extensions that do the same (e.g. `grounded-compaction`); having both active is a race condition
-
 - ◐ [`files-touched.ts`](files-touched.ts) (upstream: [badlogic/pi-mono `.pi/extensions/files.ts`](https://github.com/badlogic/pi-mono/blob/main/.pi/extensions/files.ts))
   - `/files-touched` shows files read/written/edited in the active session branch and opens the selected file in VS Code
   - This version extends the upstream original to also detect file reads/edits/writes performed through the tools of `repoprompt-mcp` and `repoprompt-cli` (`rp`, `rp_exec`) and their `read_file` / `file_actions create` / `apply_edits` actions
@@ -222,7 +220,7 @@
   - Shared core ([`_shared/files-touched-core.ts`](_shared/files-touched-core.ts)) also tracks bash-level file operations: `sed -i` (edit), `cp`/`rsync` (write destination), `tee`/`touch` (write), `patch` (edit), `curl -o`/`wget -O` (write), and shell output redirections (`>`, `>>`)
 
 - ◐ [`branch-out/`](branch-out/) ([README](branch-out/README.md)) (upstream: [davidgasquez/dotfiles](https://github.com/davidgasquez/dotfiles/blob/main/agents/pi/extensions/branch-term.ts))
-  - `/branch [--model <query>] [message]` forks the current session into a new terminal split pane or tab; backend-aware routing across cmux, tmux, iTerm2, Terminal.app, and Ghostty; split direction is config-driven (`left/right/up/down`, or `clockwise`/`counterclockwise` layout policies for cmux/tmux) with comma-separated fallback lists for cross-backend configs; optional `--model` targets a different model in the child; optional `message` prefills the child editor with a 10-second auto-submit countdown
+  - `/branch [--model <query>] [message]` forks the current session into a new terminal split pane or tab; backend-aware routing across cmux, tmux, iTerm2, Terminal.app, Ghostty, and Orca; split direction is config-driven (`left/right/up/down`, or `clockwise`/`counterclockwise` layout policies for cmux/tmux) with comma-separated fallback lists for cross-backend configs; optional `--model` targets a different model in the child; optional `message` prefills the child editor with a 10-second auto-submit countdown
 
 - ◐ [`handover/`](handover/) ([README](./handover/README.md))
   - `/handover [optional purpose]` generates a rich handover / rehydration message, forks from the first user message, and prefills the child editor with the final draft plus an appended files-touched block
@@ -290,6 +288,8 @@
 - ◐ [`cmux/`](cmux/) (upstream: [HazAT/pi-config](https://github.com/HazAT/pi-config/blob/main/extensions/cmux/index.ts))
   - cmux integration — pushes Pi agent state (model, thinking level, tokens, cost, tool activity) into the cmux sidebar; fire-and-forget, no-op when `CMUX_SOCKET_PATH` is unset
   - This version adds workspace auto-renaming: on `session_start` and `agent_end`, syncs the cmux workspace name to the Pi session name using `CMUX_WORKSPACE_ID` so concurrent cmux workspaces do not cross-rename (only when the workspace has exactly 1 pane and 1 surface)
+
+- ● [`orca-session-tab-title/`](orca-session-tab-title/) — renames the containing Orca tab to the active named Pi session on session start and `/name`, using `ORCA_TAB_ID` to target the correct tab across split panes
 
 - ○ [`interactive-shell.ts`](interactive-shell.ts) (upstream: [pi-mono examples](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent/examples/extensions))
 - ○ [`preset.ts`](preset.ts) (upstream: [pi-mono examples](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent/examples/extensions))

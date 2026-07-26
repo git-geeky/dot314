@@ -127,6 +127,7 @@ See [extensions/README.md](extensions/README.md) for more detailed descriptions.
 | ◐ | `sandbox/` | | OS-level sandboxing |
 | ● | `session-ask/` | [`pi-session-ask`](https://www.npmjs.com/package/pi-session-ask) | Query "pre-historical" context (post-compaction, post-fork/handoff) via subagent |
 | ◐ | `session-switch/` | | `/resume`-style session picker with live preview, plus `pi --switch-session` startup relaunch |
+| ● | `skill-templates/` | [`pi-skill-templates`](https://www.npmjs.com/package/pi-skill-templates) | Nunjucks-templated `SKILL.template.md` skills rendered from invocation args, options, and flags, and composed from other skills |
 | ◐ | `tools/` | | UI for enabling/disabling active Pi tools |
 | ◐ | `usage-bar.ts` | | Provider quota overlay |
 
@@ -136,16 +137,16 @@ These extensions are tracked in the repository but not exported by the Pi packag
 
 | | Extension |
 |---|---|
-| ◐ | `agentic-compaction/` |
 | ○ | `code-actions/` |
+| ● | `context-limit-fallback/` |
 | ◐ | `extension-stats.ts` |
 | ● | `inline-shell.ts` |
 | ○ | `interactive-shell.ts` |
+| ● | `orca-session-tab-title/` |
 | ○ | `preset.ts` |
 | ● | `repoprompt-cli/` |
 | ◐ | `rewind/` — archived; use upstream [`pi-rewind-hook`](https://github.com/nicobailon/pi-rewind-hook) |
 | ○ | `skill-palette/` |
-| ● | `skill-templates/` |
 | ● | `subagent-bridge/` |
 | ○ | `titlebar-spinner.ts` |
 | ○ | `todos.ts` |
@@ -161,6 +162,7 @@ These other extensions have also improved my QoL in Pi, so I recommend checking 
 | [diligent-pi](https://github.com/crstdr/diligent-pi) (crstdr) | `/diligent-context` hides past tool calls from the context, a useful alternative to compaction in some types of sessions |  |
 | [greprip](https://github.com/kaofelix/greprip) (kaofelix) | Transparent interception of `grep`/`find` commands, translating them to `rg`/`fd` for speed | `uv tool install git+https://github.com/kaofelix/greprip` + [shell config](https://github.com/kaofelix/greprip#2-configure-pi) |
 | [loop](https://github.com/mitsuhiko/agent-stuff/blob/main/pi-extensions/loop.ts) (mitsuhiko) | `/loop` starts a follow-up loop with a breakout condition | Copy to `~/.pi/agent/extensions/` |
+| [pi-codex-goal](https://github.com/fitchmultz/pi-codex-goal) (fitchmultz) | Durable Codex-style `/goal` command with `get_goal`, `create_goal`, and `update_goal` tools; goal state persists across compaction and session recovery | `pi install npm:pi-codex-goal` |
 | [pi-gpt-config](https://github.com/edxeth/pi-gpt-config) (edxeth) | Configuration of OpenAI models' API-side parameters like verbosity, fast mode, etc. | `pi install git:github.com/edxeth/pi-gpt-config` |
 | [pi-guardrails](https://github.com/aliou/pi-guardrails) (aliou) | `.env` file protection + AST-based dangerous command gates | `pi install npm:@aliou/pi-guardrails` |
 | [pi-interactive-subagents](https://github.com/HazAT/pi-interactive-subagents) (HazAT) | Spawn, orchestrate, and manage async subagent sessions in multiplexer cmux panes; main agent keeps working while subagents run in the background | `pi install git:github.com/HazAT/pi-interactive-subagents` |
@@ -168,6 +170,7 @@ These other extensions have also improved my QoL in Pi, so I recommend checking 
 | [pi-interview](https://github.com/nicobailon/pi-interview-tool) (nicobailon) | Interactive form-based input gathering with native window support | `pi install npm:pi-interview` |
 | [pi-nvim](https://github.com/aliou/pi-harness/tree/main/integrations/neovim) (aliou) | Bidirectional Neovim integration: `nvim_context` tool, LSP diagnostics at turn end, file reload after edits, visible-splits injection | Neovim plugin; see [setup instructions](https://github.com/aliou/pi-harness/tree/main/integrations/neovim#installation) |
 | [pi-prompt-template-model](https://github.com/nicobailon/pi-prompt-template-model) (nicobailon) | Adds `model`, `skill`, and `thinking` frontmatter to pi prompt templates and chained prompt template execution | `pi install npm:pi-prompt-template-model` |
+| [pi-queue-steer](https://github.com/tmustier/pi-queue-steer) (tmustier) | Cursor-inspired visible steering and follow-up timeline: queue instructions while the agent works, with editable steering (next turn) and follow-up (after run) lanes | `pi install git:github.com/tmustier/pi-queue-steer` |
 | [pi-rtk-optimizer](https://github.com/MasuRii/pi-rtk-optimizer) (MasuRii) | Read-tool-kit context optimization for token efficiency | `pi install npm:pi-rtk-optimizer` |
 | [pi-screenshots-picker](https://github.com/Graffioh/pi-screenshots-picker) (Graffioh) | Quick screenshot selection and attachment for prompts | `pi install npm:pi-screenshots-picker` |
 | [pi-token-burden](https://github.com/Whamp/pi-token-burden) (Whamp) | Token usage breakdown and context burden analysis | `pi install npm:pi-token-burden` |
@@ -186,7 +189,7 @@ These other extensions have also improved my QoL in Pi, so I recommend checking 
 
 ## Skills
 
-The Pi package does not export skills.  See [skills/README.md](skills/README.md) for full descriptions.
+The Pi package does not export skills.  See [skills/README.markdown](skills/README.markdown) for full descriptions.
 
 | | Skill | Notes |
 |---|---|---|
@@ -194,6 +197,7 @@ The Pi package does not export skills.  See [skills/README.md](skills/README.md)
 | ◐ | `dev-browser/` | 🔄 Prefer [surf/](skills/surf/) for browsing/scraping, [agent-browser/](skills/agent-browser/) for structured testing |
 | ○ | `gdcli/` | |
 | ● | `repoprompt-tool-guidance-refresh/` | Maintainer workflow |
+| ● | `rp-deep-build/` | Requires [pi-codex-goal](https://github.com/fitchmultz/pi-codex-goal) |
 | ○ | `surf/` | |
 | ◐ | `text-search/` | |
 | ◐ | `xcodebuildmcp/` | |

@@ -1,0 +1,16 @@
+{
+  "fallback": {
+    "enabled": false,
+    "selected": "anthropic/claude-opus-4-8",
+    "models": [
+      {
+        "model": "anthropic/claude-opus-4-8",
+        "thinkingLevel": "max"
+      },
+      {
+        "model": "openai-codex/gpt-5.4",
+        "thinkingLevel": "xhigh"
+      }
+    ]
+  }
+}
